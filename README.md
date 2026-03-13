@@ -120,29 +120,29 @@ go test -v -run TestGenerateToolchainTreesChanges # Generate demos-toolchain-tre
 
 ## Forks
 
-|    demo     |                         repo                          |
-| :---------: | :---------------------------------------------------: |
-|     ast     |     https://github.com/yylego/kratos-ast-examples     |
-| custom-auth | https://github.com/yylego/kratos-custom-auth-examples |
-| static-auth | https://github.com/yylego/kratos-static-auth-examples |
-|   config    |   https://github.com/yylego/kratos-config-examples    |
-|    cron     |    https://github.com/yylego/kratos-cron-examples     |
-|     ebz     |     https://github.com/yylego/kratos-ebz-examples     |
-|    cobra    |    https://github.com/yylego/kratos-cobra-examples    |
-|    gorm     |    https://github.com/yylego/kratos-gorm-examples     |
-|    cors     |    https://github.com/yylego/kratos-cors-examples     |
-|    i18n     |    https://github.com/yylego/kratos-i18n-examples     |
-|    nacos    |    https://github.com/yylego/kratos-nacos-examples    |
-|   swaggo    |   https://github.com/yylego/kratos-swaggo-examples    |
-|    trace    |    https://github.com/yylego/kratos-trace-examples    |
-|    test     |    https://github.com/yylego/kratos-test-examples     |
-|    vue3     |    https://github.com/yylego/kratos-vue3-examples     |
-|    wire     |    https://github.com/yylego/kratos-wire-examples     |
-|     zap     |     https://github.com/yylego/kratos-zap-examples     |
-|    zapzh    |    https://github.com/yylego/kratos-zapzh-examples    |
-|   migrate   |   https://github.com/yylego/kratos-migrate-examples   |
-|    ping     |    https://github.com/yylego/kratos-ping-examples     |
-| supervisord | https://github.com/yylego/kratos-supervisordrun-examples |
+|    demo     |                       repo                        |
+| :---------: | :-----------------------------------------------: |
+|     ast     |     https://github.com/kratos-examples/ast     |
+| custom-auth | https://github.com/kratos-examples/custom-auth |
+| static-auth | https://github.com/kratos-examples/static-auth |
+|   config    |   https://github.com/kratos-examples/config    |
+|    cron     |    https://github.com/kratos-examples/cron     |
+|     ebz     |     https://github.com/kratos-examples/ebz     |
+|    cobra    |    https://github.com/kratos-examples/cobra    |
+|    gorm     |    https://github.com/kratos-examples/gorm     |
+|    cors     |    https://github.com/kratos-examples/cors     |
+|    i18n     |    https://github.com/kratos-examples/i18n     |
+|    nacos    |    https://github.com/kratos-examples/nacos    |
+|   swaggo    |   https://github.com/kratos-examples/swaggo    |
+|    trace    |    https://github.com/kratos-examples/trace    |
+|    test     |    https://github.com/kratos-examples/test     |
+|    vue3     |    https://github.com/kratos-examples/vue3     |
+|    wire     |    https://github.com/kratos-examples/wire     |
+|     zap     |     https://github.com/kratos-examples/zap     |
+|    zapzh    |    https://github.com/kratos-examples/zapzh    |
+|   migrate   |   https://github.com/kratos-examples/migrate   |
+|    ping     |    https://github.com/kratos-examples/ping     |
+| supervisord | https://github.com/kratos-examples/supervisord |
 
 <!-- TEMPLATE (EN) BEGIN: STANDARD PROJECT FOOTER -->
 <!-- VERSION 2025-11-25 03:52:28.131064 +0000 UTC -->
