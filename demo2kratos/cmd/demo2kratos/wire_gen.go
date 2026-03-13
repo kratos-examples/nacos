@@ -23,12 +23,17 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	if err != nil {
 		return nil, nil, err
 	}
-	articleUsecase := biz.NewArticleUsecase(dataData, logger)
+	nacosNamingClient := data.NewNacosNamingClient()
+	demo1GrpcClient, cleanup2 := data.NewDemo1GrpcClient(nacosNamingClient, logger)
+	demo1HttpClient, cleanup3 := data.NewDemo1HttpClient(nacosNamingClient, logger)
+	articleUsecase := biz.NewArticleUsecase(dataData, demo1GrpcClient, demo1HttpClient, logger)
 	articleService := service.NewArticleService(articleUsecase)
 	grpcServer := server.NewGRPCServer(confServer, articleService, logger)
 	httpServer := server.NewHTTPServer(confServer, articleService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
+		cleanup3()
+		cleanup2()
 		cleanup()
 	}, nil
 }

@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var ProviderSet = wire.NewSet(NewData)
+var ProviderSet = wire.NewSet(NewData, NewNacosNamingClient, NewDemo1GrpcClient, NewDemo1HttpClient)
 
 type Data struct {
 	db *gorm.DB
