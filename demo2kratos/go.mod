@@ -66,3 +66,5 @@ require (
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/yylego/kratos-examples/demo1kratos => ../demo1kratos

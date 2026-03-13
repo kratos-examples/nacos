@@ -130,8 +130,6 @@ github.com/yylego/formatgo v0.0.0 h1:P8sttCVb+cT6+B0UfjC1Bg80GxCFm56ONx4hnVBwMfk
 github.com/yylego/formatgo v0.0.0/go.mod h1:GplYsWVp1atmoWajHL3jRJghU01y7XZgQ686hcljgYo=
 github.com/yylego/kratos-ebz v0.0.0 h1:VS8NVg1NrCE3cfJ/j+Bv+F3Kl/UdNh+R+XHw+NjL/gc=
 github.com/yylego/kratos-ebz v0.0.0/go.mod h1:4XLBNKbYtjf3iXm2JS8tqGcINyBbmicsbjXlaD2G2i4=
-github.com/yylego/kratos-examples/demo1kratos v0.0.1 h1:QC7PzUpiNCB0Yh152yV3qu51TOuBENDay6zz8OCpTLk=
-github.com/yylego/kratos-examples/demo1kratos v0.0.1/go.mod h1:rtWq/4jAd1pYhIRd01v4oKFTU8vvWOWJcpP1gemaW7I=
 github.com/yylego/must v0.0.0 h1:x2KPl61oxeLslgK3AH3nBQiGYic/MIb8mj6TOnVsalE=
 github.com/yylego/must v0.0.0/go.mod h1:9tdcRG+PZ9ah8bMSjxu+/4OEWtGdINeKdmik1WNhsYw=
 github.com/yylego/mutexmap v0.0.0 h1:gnJEBJoYP/3XyXfespDimm2I8UUv+UovbCZ0GYZnYkc=
