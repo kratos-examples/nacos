@@ -2,35 +2,41 @@
 
 Code differences compared to source project.
 
-## cmd/demo1kratos/main.go (+72 -7)
+## cmd/demo1kratos/main.go (+74 -7)
 
 ```diff
-@@ -1,37 +1,69 @@
+@@ -1,40 +1,74 @@
  package main
  
  import (
 -	"flag"
 +	"fmt"
+ 	"log/slog"
  	"os"
  
-+	nacosconfig "github.com/go-kratos/kratos/contrib/config/nacos/v2"
-+	nacosregist "github.com/go-kratos/kratos/contrib/registry/nacos/v2"
- 	"github.com/go-kratos/kratos/v2"
- 	"github.com/go-kratos/kratos/v2/config"
--	"github.com/go-kratos/kratos/v2/config/file"
- 	"github.com/go-kratos/kratos/v2/log"
- 	"github.com/go-kratos/kratos/v2/middleware/tracing"
- 	"github.com/go-kratos/kratos/v2/transport/grpc"
- 	"github.com/go-kratos/kratos/v2/transport/http"
++	nacosconfig "github.com/go-kratos/kratos/contrib/config/nacos/v3"
+ 	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
++	nacosregist "github.com/go-kratos/kratos/contrib/registry/nacos/v3"
+ 	"github.com/go-kratos/kratos/v3"
+ 	"github.com/go-kratos/kratos/v3/config"
+-	"github.com/go-kratos/kratos/v3/config/file"
+ 	"github.com/go-kratos/kratos/v3/log"
+ 	"github.com/go-kratos/kratos/v3/transport/grpc"
+ 	"github.com/go-kratos/kratos/v3/transport/http"
 +	"github.com/nacos-group/nacos-sdk-go/clients"
 +	"github.com/nacos-group/nacos-sdk-go/common/constant"
 +	"github.com/nacos-group/nacos-sdk-go/vo"
++	clientsv2 "github.com/nacos-group/nacos-sdk-go/v2/clients"
++	constantv2 "github.com/nacos-group/nacos-sdk-go/v2/common/constant"
++	vov2 "github.com/nacos-group/nacos-sdk-go/v2/vo"
  	"github.com/yylego/done"
  	"github.com/yylego/kratos-examples/demo1kratos/internal/conf"
  	"github.com/yylego/must"
 +	"github.com/yylego/neatjson/neatjsons"
  	"github.com/yylego/rese"
 +	"github.com/yylego/tern/zerotern"
+ 
+ 	_ "go.uber.org/automaxprocs"
  )
  
 +const nacosGroup = "demokratos"
@@ -52,13 +58,14 @@ Code differences compared to source project.
 +	fmt.Println("service-name:", Name)
  }
  
- func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
-+	// cp from https://github.com/go-kratos/examples/blob/61daed1ec4d5a94d689bc8fab9bc960c6af73ead/registry/nacos/server/main.go#L30
-+	sc := []constant.ServerConfig{
-+		*constant.NewServerConfig("127.0.0.1", 8848),
+ func newApp(logger *slog.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
++	// The registry uses the nacos-sdk-go v2 naming client (required by contrib registry/nacos/v3)
++	// 注册用 nacos-sdk-go v2 的命名客户端（contrib registry/nacos/v3 要求 v2）
++	sc := []constantv2.ServerConfig{
++		*constantv2.NewServerConfig("127.0.0.1", 8848),
 +	}
 +
-+	cc := &constant.ClientConfig{
++	cc := &constantv2.ClientConfig{
 +		NamespaceId:         "public",
 +		TimeoutMs:           5000,
 +		NotLoadCacheAtStart: true,
@@ -67,20 +74,18 @@ Code differences compared to source project.
 +		LogLevel:            "debug",
 +	}
 +
-+	namingClient := rese.V1(clients.NewNamingClient(
-+		vo.NacosClientParam{
++	namingClient := rese.V1(clientsv2.NewNamingClient(
++		vov2.NacosClientParam{
 +			ClientConfig:  cc,
 +			ServerConfigs: sc,
 +		},
 +	))
 +
-+	// cp from https://github.com/go-kratos/examples/blob/61daed1ec4d5a94d689bc8fab9bc960c6af73ead/registry/nacos/server/main.go#L72
 +	regist := nacosregist.New(namingClient, nacosregist.WithGroup(nacosGroup))
-+	// cp from https://github.com/go-kratos/examples/blob/61daed1ec4d5a94d689bc8fab9bc960c6af73ead/registry/nacos/server/main.go#L79
  	return kratos.New(
  		kratos.ID(done.VCE(os.Hostname()).Omit()),
  		kratos.Name(Name),
-@@ -42,11 +74,14 @@
+@@ -45,11 +79,14 @@
  			gs,
  			hs,
  		),
@@ -93,15 +98,16 @@ Code differences compared to source project.
 +	// 有的时候会没有服务名称，需要默认值，假如没有服务名称就无法进行服务注册，因此当没有服务名称时，给个默认的服务名称
 +	Name = zerotern.VV(Name, defaultServiceName)
 +
- 	logger := log.With(log.NewStdLogger(os.Stdout),
- 		"ts", log.DefaultTimestamp,
- 		"caller", log.DefaultCaller,
-@@ -56,9 +91,33 @@
- 		"trace.id", tracing.TraceID(),
- 		"span.id", tracing.SpanID(),
+ 	logger := log.NewLogger(
+ 		slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+ 			AddSource: true,
+@@ -62,9 +99,33 @@
+ 		slog.String("service.version", Version),
  	)
+ 	log.SetDefault(logger)
 +
-+	// cp from https://github.com/go-kratos/kratos/blob/d6f5f00cf562b46322b0ed42d183b1b873c0a68f/contrib/config/nacos/config_test.go#L16
++	// The config source uses the nacos-sdk-go v1 config client (required by contrib config/nacos/v3)
++	// 配置源用 nacos-sdk-go v1 的配置客户端（contrib config/nacos/v3 要求 v1）
 +	sc := []constant.ServerConfig{
 +		*constant.NewServerConfig("127.0.0.1", 8848),
 +	}
@@ -121,7 +127,6 @@ Code differences compared to source project.
 +		},
 +	))
 +
-+	// cp from https://github.com/go-kratos/kratos/blob/d6f5f00cf562b46322b0ed42d183b1b873c0a68f/contrib/config/nacos/config_test.go#L39
 +	source := nacosconfig.NewConfigSource(configClient, nacosconfig.WithGroup(nacosGroup), nacosconfig.WithDataID(dataID))
 +
  	c := config.New(
@@ -131,7 +136,7 @@ Code differences compared to source project.
  		),
  	)
  	defer rese.F0(c.Close)
-@@ -67,6 +126,12 @@
+@@ -73,6 +134,12 @@
  
  	var cfg conf.Bootstrap
  	must.Done(c.Scan(&cfg))
@@ -149,15 +154,15 @@ Code differences compared to source project.
 ## internal/server/grpc.go (+2 -0)
 
 ```diff
-@@ -2,6 +2,7 @@
- 
+@@ -3,6 +3,7 @@
  import (
- 	"github.com/go-kratos/kratos/v2/log"
-+	"github.com/go-kratos/kratos/v2/middleware/logging"
- 	"github.com/go-kratos/kratos/v2/middleware/recovery"
- 	"github.com/go-kratos/kratos/v2/transport/grpc"
+ 	"log/slog"
+ 
++	"github.com/go-kratos/kratos/v3/middleware/logging"
+ 	"github.com/go-kratos/kratos/v3/middleware/recovery"
+ 	"github.com/go-kratos/kratos/v3/transport/grpc"
  	pb "github.com/yylego/kratos-examples/demo1kratos/api/student"
-@@ -13,6 +14,7 @@
+@@ -14,6 +15,7 @@
  	var opts = []grpc.ServerOption{
  		grpc.Middleware(
  			recovery.Recovery(),
@@ -170,15 +175,15 @@ Code differences compared to source project.
 ## internal/server/http.go (+2 -0)
 
 ```diff
-@@ -2,6 +2,7 @@
- 
+@@ -3,6 +3,7 @@
  import (
- 	"github.com/go-kratos/kratos/v2/log"
-+	"github.com/go-kratos/kratos/v2/middleware/logging"
- 	"github.com/go-kratos/kratos/v2/middleware/recovery"
- 	"github.com/go-kratos/kratos/v2/transport/http"
+ 	"log/slog"
+ 
++	"github.com/go-kratos/kratos/v3/middleware/logging"
+ 	"github.com/go-kratos/kratos/v3/middleware/recovery"
+ 	"github.com/go-kratos/kratos/v3/transport/http"
  	pb "github.com/yylego/kratos-examples/demo1kratos/api/student"
-@@ -13,6 +14,7 @@
+@@ -14,6 +15,7 @@
  	var opts = []http.ServerOption{
  		http.Middleware(
  			recovery.Recovery(),

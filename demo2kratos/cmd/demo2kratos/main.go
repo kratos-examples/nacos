@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
-	nacosconfig "github.com/go-kratos/kratos/contrib/config/nacos/v2"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	nacosconfig "github.com/go-kratos/kratos/contrib/config/nacos/v3"
+	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
+	"github.com/go-kratos/kratos/v3"
+	"github.com/go-kratos/kratos/v3/config"
+	"github.com/go-kratos/kratos/v3/log"
+	"github.com/go-kratos/kratos/v3/transport/grpc"
+	"github.com/go-kratos/kratos/v3/transport/http"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
@@ -20,6 +21,8 @@ import (
 	"github.com/yylego/neatjson/neatjsons"
 	"github.com/yylego/rese"
 	"github.com/yylego/tern/zerotern"
+
+	_ "go.uber.org/automaxprocs"
 )
 
 const nacosGroup = "demokratos"
@@ -38,7 +41,7 @@ func init() {
 	fmt.Println("service-name:", Name)
 }
 
-func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
+func newApp(logger *slog.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 	return kratos.New(
 		kratos.ID(done.VCE(os.Hostname()).Omit()),
 		kratos.Name(Name),
@@ -56,17 +59,21 @@ func main() {
 	// 有的时候会没有服务名称，需要默认值
 	Name = zerotern.VV(Name, defaultServiceName)
 
-	logger := log.With(log.NewStdLogger(os.Stdout),
-		"ts", log.DefaultTimestamp,
-		"caller", log.DefaultCaller,
-		"service.id", kratos.ID(done.VCE(os.Hostname()).Omit()),
-		"service.name", Name,
-		"service.version", Version,
-		"trace.id", tracing.TraceID(),
-		"span.id", tracing.SpanID(),
+	logger := log.NewLogger(
+		slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			AddSource: true,
+			Level:     slog.LevelInfo,
+		}),
+		log.WithExtractor(tracing.TraceAttrs),
+	).With(
+		slog.String("service.id", done.VCE(os.Hostname()).Omit()),
+		slog.String("service.name", Name),
+		slog.String("service.version", Version),
 	)
+	log.SetDefault(logger)
 
-	// cp from https://github.com/go-kratos/kratos/blob/d6f5f00cf562b46322b0ed42d183b1b873c0a68f/contrib/config/nacos/config_test.go#L16
+	// The config source uses the nacos-sdk-go v1 config client (required by contrib config/nacos/v3)
+	// 配置源用 nacos-sdk-go v1 的配置客户端（contrib config/nacos/v3 要求 v1）
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig("127.0.0.1", 8848),
 	}
@@ -86,7 +93,6 @@ func main() {
 		},
 	))
 
-	// cp from https://github.com/go-kratos/kratos/blob/d6f5f00cf562b46322b0ed42d183b1b873c0a68f/contrib/config/nacos/config_test.go#L39
 	source := nacosconfig.NewConfigSource(configClient, nacosconfig.WithGroup(nacosGroup), nacosconfig.WithDataID(dataID))
 
 	c := config.New(
