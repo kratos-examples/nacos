@@ -196,7 +196,7 @@ Code differences compared to source project.
 +			Name: a.Title,
 +		})
 +		if err != nil {
-+			return nil, ebzkratos.New(pb.ErrorServerError("call demo1 over grpc: %v", err))
++			return nil, ebzkratos.New(pb.ErrorArticleCreateFailure("call demo1 over grpc: %v", err))
 +		}
 +		res.Content = res.Content + " [grpc-resp:" + resp.GetStudent().GetName() + "]"
 +	} else {
@@ -204,7 +204,7 @@ Code differences compared to source project.
 +			Name: a.Title,
 +		})
 +		if err != nil {
-+			return nil, ebzkratos.New(pb.ErrorServerError("call demo1 over http: %v", err))
++			return nil, ebzkratos.New(pb.ErrorArticleCreateFailure("call demo1 over http: %v", err))
 +		}
 +		res.Content = res.Content + " [http-resp:" + resp.GetStudent().GetName() + "]"
 +	}
